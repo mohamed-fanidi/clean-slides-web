@@ -1,7 +1,8 @@
 import { getRecentProjects } from "@/actions/project"
 import { onAuthenticateUser } from "@/actions/user"
+import Header from "@/components/global/dashboard/header"
 import AppSidebar from "@/components/global/sidebar/app-sidebar"
-import { SidebarProvider } from "@/components/ui/sidebar"
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { redirect } from "next/navigation"
 import React from "react"
 
@@ -19,7 +20,10 @@ export default async function Layout({ children }: Props) {
         user={checkUser.user}
         recentProjects={recentProjects.data || []}
       />
-      {children}
+      <SidebarInset>
+          <Header user={checkUser.user}/>
+          {children}
+      </SidebarInset>
     </SidebarProvider>
   )
 }

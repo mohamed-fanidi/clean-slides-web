@@ -8,10 +8,11 @@ import { NavHeader } from "@/components/global/sidebar/nav-header"
 import { NavMain } from "@/components/global/sidebar/nav-main"
 import Link from "next/link"
 import { AddCircle } from "@solar-icons/react"
-import { buttonVariants } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { data } from "@/lib/constants"
 import { Project, User } from "@prisma/client"
+import { useRouter } from "next/navigation"
 
 const AppSidebar = ({
   recentProjects,
@@ -23,14 +24,18 @@ const AppSidebar = ({
   user: User
   hasUpgraded?: boolean
 } & React.ComponentProps<typeof Sidebar>) => {
+  const router = useRouter()
   return (
     <Sidebar {...props}>
       <NavHeader user={user} />
       <SidebarContent>
-        <Link href="/new" className={cn(buttonVariants(), "m-2 rounded-md")}>
+        <Button
+          onClick={() => router.push('/new')}
+          className={cn(buttonVariants(), "m-2 rounded-md")}
+        >
           <AddCircle className="size-4" weight="Bold" />
           Create New Slide
-        </Link>
+        </Button>
         <NavMain items={data.navMain} />
 
         <RecentOpen recentProjects={recentProjects} />

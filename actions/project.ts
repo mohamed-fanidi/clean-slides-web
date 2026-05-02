@@ -25,7 +25,7 @@ export async function getAllProjects() {
 
     return { status: 200, data: projects }
   } catch (error) {
-    console.log("🗿 Error", error)
+    console.error("🗿 Error", error)
     return { status: 500, error: "Internal server error" }
   }
 }
@@ -59,7 +59,7 @@ export const getRecentProjects = async () => {
       data: projects,
     }
   } catch (error) {
-    console.error("ERROR", error)
+    console.error("🗿 Error", error)
     return {
       status: 500,
       error: "Internal server error ",

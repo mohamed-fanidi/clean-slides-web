@@ -1,4 +1,8 @@
+import { getAllProjects } from "@/actions/project";
+import NoProjects from "@/components/global/dashboard/no-projects";
+
 export default async function dashBoard() {
+  const allProjects = await getAllProjects()
   return (
     <div className="relative flex w-full flex-col gap-6 px-6 py-4">
       <div className="flex w-full flex-col-reverse items-start gap-6 sm:flex-row sm:items-center sm:justify-between">
@@ -11,6 +15,7 @@ export default async function dashBoard() {
           </p>
         </div>
       </div>
+      {allProjects.data && allProjects.data.length > 0 ? "" : <NoProjects/>}
     </div>
   )
 }
