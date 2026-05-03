@@ -7,10 +7,7 @@ import {
   InputGroupAddon,
 } from "@/components/ui/input-group"
 import { Button } from "@/components/ui/button"
-import {
-  AddCircle,
-  InboxOut,
-} from "@solar-icons/react"
+import { AddCircle, InboxOut } from "@solar-icons/react"
 import { User } from "@prisma/client"
 import { useRouter } from "next/navigation"
 
@@ -38,7 +35,11 @@ export default function Header({ user }: Props) {
           <InboxOut weight="Linear" size={64} />
           Import
         </Button>
-        <Button onClick={() => router.push('/new')}>
+        <Button
+          className="rounded-md"
+          disabled={!user.subscription}
+          onClick={() => router.push("/new")}
+        >
           <AddCircle className="size-4" weight="Bold" />
           Create New Slide
         </Button>

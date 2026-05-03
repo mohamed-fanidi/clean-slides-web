@@ -6,7 +6,6 @@ import RecentOpen from "@/components/global/sidebar/recent-open"
 import { NavFooter } from "@/components/global/sidebar/nav-footer"
 import { NavHeader } from "@/components/global/sidebar/nav-header"
 import { NavMain } from "@/components/global/sidebar/nav-main"
-import Link from "next/link"
 import { AddCircle } from "@solar-icons/react"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -30,8 +29,9 @@ const AppSidebar = ({
       <NavHeader user={user} />
       <SidebarContent>
         <Button
-          onClick={() => router.push('/new')}
-          className={cn(buttonVariants(), "m-2 rounded-md")}
+          disabled={!user.subscription}
+          onClick={() => router.push("/new")}
+          className="m-2 rounded-md"
         >
           <AddCircle className="size-4" weight="Bold" />
           Create New Slide
