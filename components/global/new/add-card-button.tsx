@@ -6,7 +6,7 @@ type Props = {
   onAddCard: () => void
 }
 
-const AddCartButton = ({ onAddCard }: Props) => {
+const AddCardButton = ({ onAddCard }: Props) => {
   const [showGap, setShowGap] = useState(false)
   return (
     <div
@@ -33,4 +33,4 @@ const AddCartButton = ({ onAddCard }: Props) => {
   )
 }
 
-export default AddCartButton
+export default AddCardButton

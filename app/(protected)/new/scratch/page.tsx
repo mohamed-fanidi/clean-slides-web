@@ -1,5 +1,5 @@
 "use client"
-import { useRouter } from "next/navigation"
+import { redirect, useRouter } from "next/navigation"
 import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
@@ -14,15 +14,21 @@ import { v4 } from "uuid"
 import { toast } from "sonner"
 import { createProject } from "@/actions/project"
 import { useSlideStore } from "@/store/use-slide-store"
+import { onAuthenticateUser } from "@/actions/user"
 
-const ScratchPage = () => {
+const ScratchPage = async () => {
+
+  const checkUser = await onAuthenticateUser()
+  if(!checkUser.user?.subscription){
+    redirect('/dashboard')
+  }
+
   const router = useRouter()
   const { setProject } = useSlideStore()
   const [editText, setEditText] = useState("")
   const [editingCard, setEditingCard] = useState<string | null>(null)
   const [selectedCard, setSelectedCard] = useState<string | null>(null)
-  const { outlines, resetOutlines, addOutline, addMultipleOutlines } =
-    useScratchStore()
+  const { outlines, resetOutlines, addOutline, addMultipleOutlines } = useScratchStore()
   const handleBack = () => {
     resetOutlines()
   }
@@ -151,7 +157,7 @@ const ScratchPage = () => {
       </Button>
       {outlines?.length > 0 && (
         <Button className="w-full" onClick={handleGenerate}>
-          Generate PPT
+          Generate Slides
         </Button>
       )}
     </div>

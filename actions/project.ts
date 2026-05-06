@@ -3,6 +3,7 @@
 import { client } from "@/lib/prisma"
 import { onAuthenticateUser } from "./user"
 import { OutlineCard } from "@/lib/types"
+import { JsonValue } from "@prisma/client/runtime/library"
 
 export async function getAllProjects() {
   try {
@@ -88,7 +89,7 @@ export const recoverProject = async (projectId: string) => {
     }
     return { status: 200, data: updatedProject }
   } catch (error) {
-    console.error("ERROR", error)
+    console.error("🗿 Error", error)
     return { status: 500, error: "Internal server error" }
   }
 }
@@ -115,7 +116,7 @@ export const deleteProject = async (projectId: string) => {
 
     return { status: 200, data: updatedProject }
   } catch (error) {
-    console.error("ERROR", error)
+    console.error("🗿 Error", error)
     return { status: 500, error: "Internal server error" }
   }
 }
@@ -146,7 +147,75 @@ export const createProject = async (title: string, outlines: OutlineCard[]) => {
     }
     return { status: 200, data: project }
   } catch (error) {
-    console.error("ERROR", error)
+    console.error("🗿 Error", error)
     return { status: 500, error: "Internal server error" }
   }
+}
+
+export const getProjectById = async (projectId : string) => {
+    try {
+        const checkUser = await onAuthenticateUser()
+        if(checkUser.status !== 200 || !checkUser.user) {
+            return {status: 403, error: "User not authenticated"}
+        }
+        const project = await client.project.findFirst({
+            where: {id: projectId},
+        })
+        if(!project){
+            return {status: 404, error: "Project not found"}
+        }
+        return { status: 200, data: project}
+    } catch (error) {
+        console.error("🗿 Error", error)
+        return {status: 500, error: "Internal server error"}
+    }
+}
+
+export const updateSlides = async (projectId:string,slides : JsonValue)=>{
+    try{
+        if(!projectId || !slides){
+            return { status : 400 , error: 'Project ID and slides are required.'}
+        }
+
+        const updatedProject= await client.project.update({
+            where : {
+                id : projectId ,
+            },
+            data : {
+                slides,
+            },
+        })
+        if(!updatedProject) {
+            return {status : 500 , error :'Failed to update slides'}
+        }
+        return {status : 200,data : updatedProject}
+    }
+    catch(error) {
+        console.error("🗿 Error", error)
+        return {status : 500 , error:'Internal server error '}
+    }
+}
+
+
+export const updateTheme = async (projectId : string , theme :string)=> {
+    try {
+        if(!projectId || !theme) {
+            return {status : 400 , error : 'Project ID and slides are required .'}
+        }
+        const updatedProject = await client.project.update({
+            where : {
+                id : projectId ,
+            },
+            data : {
+                themeName : theme,
+            },
+        })
+        if(!updatedProject){
+            return {status : 500 , error : 'Failed to update slides'}
+        }
+        return {status : 200 ,data : updatedProject}
+    } catch (error) {
+        console.error("🗿 Error", error)
+        return {status : 500 ,error:'Internal server error'}
+    }
 }

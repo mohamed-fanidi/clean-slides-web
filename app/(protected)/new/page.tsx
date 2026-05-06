@@ -1,19 +1,27 @@
 "use client"
+import { onAuthenticateUser } from "@/actions/user"
 import { Button } from "@/components/ui/button"
 import { new_page_options } from "@/lib/constants"
 import { ArrowLeft } from "@solar-icons/react"
 import { X } from "lucide-react"
 import Link from "next/link"
+import { redirect } from "next/navigation"
 import { useState } from "react"
 
-export default function page() {
+export default async function page() {
+
+  const checkUser = await onAuthenticateUser()
+  if(!checkUser.user?.subscription){
+    redirect('/dashboard')
+  }
+
   const [selectedOption, setSelectedOption] = useState<string | null>(null)
 
   return (
     <div className="relative flex h-screen w-full items-center justify-center">
       <main className="flex flex-col gap-8">
         <h1 className="text-4xl tracking-tighter">
-          <span className="dark:text-chart-24ereeewee text-primary">
+          <span className="dark:text-chart-24ereeewee text-primary"> {/*FIXME: WHAT is that className?*/}
             Let's create
           </span>{" "}
           <span className="">your best presentation</span>

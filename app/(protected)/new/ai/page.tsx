@@ -1,5 +1,5 @@
 "use client"
-import { useRouter } from "next/navigation"
+import { redirect, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, Loader, Loader2, RotateCcw } from "lucide-react"
@@ -19,8 +19,15 @@ import { v4 } from "uuid"
 import { createProject } from "@/actions/project"
 import { useSlideStore } from "@/store/use-slide-store"
 import { generateCreativePrompt } from "@/actions/chatgpt"
+import { onAuthenticateUser } from "@/actions/user"
 
-const CreateAI = () => {
+const CreateAI = async () => {
+
+  const checkUser = await onAuthenticateUser()
+  if(!checkUser.user?.subscription){
+    redirect('/dashboard')
+  }
+
   const router = useRouter()
   const { setProject } = useSlideStore()
   const [editingCard, setEditingCard] = useState<string | null>(null)
@@ -48,7 +55,7 @@ const CreateAI = () => {
   const generateOutline = async () => {
     if (currentAiPrompt === "") {
       toast.error("Error", {
-        description: "Please enter a prompt to  generate an outline.",
+        description: "Please enter a prompt to generate an outline.",
       })
       return
     }
@@ -76,7 +83,7 @@ const CreateAI = () => {
       })
     } else {
       toast.error("Error", {
-        description: "Failed to generate outline. Please try again .",
+        description: "Failed to generate outline. Please try again.",
       })
     }
     setIsGenerating(false)
@@ -103,7 +110,7 @@ const CreateAI = () => {
       setProject(res.data)
 
       toast.success("Success", {
-        description: "Project created successfully! ",
+        description: "Project created successfully!",
       })
       setCurrentAiPrompt("")
       resetOutlines()
@@ -129,6 +136,7 @@ const CreateAI = () => {
       </Button>
       <div className="space-y-2 text-center">
         <h1 className="text-4xl font-bold text-primary">
+          {/*WARN:className="text-vivid" doesn't seem to do anything*/}
           Generate with <span className="text-vivid">Creative AI</span>
         </h1>
         <p className="text-muted-white"> What would like to create today ?</p>
@@ -218,7 +226,7 @@ const CreateAI = () => {
               <Loader className="mr-2 animate-spin" /> Generating...
             </>
           ) : (
-            "Generate"
+            "Generate Slides"
           )}
         </Button>
       )}

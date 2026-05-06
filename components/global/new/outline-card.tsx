@@ -2,7 +2,7 @@
 import { OutlineCard } from "@/lib/types"
 import React, { useRef, useState } from "react"
 import Card from "./card"
-import AddCartButton from "./add-cart-button"
+import AddCardButton from "./add-card-button"
 
 type Props = {
   outlines: OutlineCard[]
@@ -189,7 +189,7 @@ const CardList = ({
             }}
             dragOverStyles={getDragOverStyles(index)}
           />
-          <AddCartButton onAddCard={() => onAddCard(index)} />
+          <AddCardButton onAddCard={() => onAddCard(index)} />
         </React.Fragment>
       ))}
     </div>
