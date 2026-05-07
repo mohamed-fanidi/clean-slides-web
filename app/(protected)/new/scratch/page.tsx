@@ -1,5 +1,5 @@
 "use client"
-import { redirect, useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
@@ -14,14 +14,8 @@ import { v4 } from "uuid"
 import { toast } from "sonner"
 import { createProject } from "@/actions/project"
 import { useSlideStore } from "@/store/use-slide-store"
-import { onAuthenticateUser } from "@/actions/user"
 
-const ScratchPage = async () => {
-
-  const checkUser = await onAuthenticateUser()
-  if(!checkUser.user?.subscription){
-    redirect('/dashboard')
-  }
+const ScratchPage = () => {
 
   const router = useRouter()
   const { setProject } = useSlideStore()

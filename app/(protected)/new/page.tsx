@@ -1,19 +1,12 @@
 "use client"
-import { onAuthenticateUser } from "@/actions/user"
 import { Button } from "@/components/ui/button"
 import { new_page_options } from "@/lib/constants"
 import { ArrowLeft } from "@solar-icons/react"
 import { X } from "lucide-react"
 import Link from "next/link"
-import { redirect } from "next/navigation"
 import { useState } from "react"
 
-export default async function page() {
-
-  const checkUser = await onAuthenticateUser()
-  if(!checkUser.user?.subscription){
-    redirect('/dashboard')
-  }
+export default function page() {
 
   const [selectedOption, setSelectedOption] = useState<string | null>(null)
 

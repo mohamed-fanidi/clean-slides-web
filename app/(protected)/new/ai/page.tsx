@@ -1,5 +1,5 @@
 "use client"
-import { redirect, useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, Loader, Loader2, RotateCcw } from "lucide-react"
@@ -19,14 +19,8 @@ import { v4 } from "uuid"
 import { createProject } from "@/actions/project"
 import { useSlideStore } from "@/store/use-slide-store"
 import { generateCreativePrompt } from "@/actions/chatgpt"
-import { onAuthenticateUser } from "@/actions/user"
 
-const CreateAI = async () => {
-
-  const checkUser = await onAuthenticateUser()
-  if(!checkUser.user?.subscription){
-    redirect('/dashboard')
-  }
+const CreateAI = () => {
 
   const router = useRouter()
   const { setProject } = useSlideStore()

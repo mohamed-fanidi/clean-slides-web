@@ -1,6 +1,7 @@
 'use client'
+
 import { useSlideStore } from '@/store/use-slide-store'
-import { useParams, useRouter } from 'next/navigation'
+import { redirect, useParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Palette } from 'lucide-react'
@@ -18,9 +19,9 @@ const ThemePreview = () => {
   const [selectedTheme, setSelectedTheme] = useState<Theme>(currentTheme)
   const [open, setOpen] = useState(false)
 
-  useEffect(() => {
-    if (project?.slides) router.push(`/presentation/${params.presentationId}`)
-  }, [project])
+  // useEffect(() => {
+  //   if (project?.slides) router.push(`/presentation/${params.presentationId}`)
+  // }, [project])
 
   const applyTheme = (theme: Theme) => {
     setSelectedTheme(theme)
@@ -40,7 +41,8 @@ const ThemePreview = () => {
         <div className="flex justify-between items-center mb-6">
           <Button
             variant="outline"
-            onClick={() => router.push('/new')}
+            // onClick={() => router.push('/new')}
+            onClick={() => redirect('/new')}
             className="h-10 text-sm px-4"
             style={{
               background: selectedTheme.accentColor + '10',
