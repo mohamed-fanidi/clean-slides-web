@@ -1,210 +1,178 @@
-'use client'
+"use client"
 
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Skeleton } from '@/components/ui/skeleton'
-import { LayoutSlides, Slide } from '@/lib/types'
-import { cn } from '@/lib/utils'
-import { useSlideStore } from '@/store/use-slide-store'
-import { useSidebarStore } from '@/store/use-sidebar-store'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { v4 as uuidv4 } from 'uuid'
-import { useDrag, useDrop } from 'react-dnd'
-import { MasterRecursiveComponent } from './master-recursive-component'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Button } from '@/components/ui/button'
-import { EllipsisVertical, Trash } from 'lucide-react'
-import { updateSlides } from '@/actions/project'
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Layout, Slide as S } from "@/lib/types"
+import { cn } from "@/lib/utils"
+import { useSlideStore } from "@/store/use-slide-store"
+import React, { useCallback, useEffect, useRef, useState } from "react"
+import { MasterRecursiveComponent } from "./master-recursive-component"
 
-interface DropZoneProps {
+import { updateSlides } from "@/actions/project"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { EllipsisVertical, Plus, Trash } from "lucide-react"
+import { ScrollArea as LayoutScrollArea } from "@/components/ui/scroll-area"
+import { layouts } from "@/lib/constants"
+import LayoutPreviewItem from "@/components/global/presentation/right-sidebar/tabs/components-tab/layout-preview-item"
+
+// ── Clickable layout item (no drag) ──────────────────────────────────────────
+const ClickableLayoutItem = ({
+  component,
+  icon,
+  layoutType,
+  name,
+  type,
+  onSelect,
+}: Layout & { onSelect: (layout: Layout) => void }) => (
+  <div
+    className="cursor-pointer rounded-lg"
+    onClick={() => onSelect({ component, icon, layoutType, name, type })}
+  >
+    <LayoutPreviewItem
+      name={name}
+      Icon={icon}
+      type={type}
+      component={component}
+    />
+  </div>
+)
+
+// ── Gap between slides ────────────────────────────────────────────────────────
+const SlideGap = ({
+  index,
+  onAdd,
+}: {
   index: number
-  onDrop: (
-    item: {
-      type: string
-      layoutType: string
-      component: LayoutSlides
-      index?: number
-    },
-    dropIndex: number
-  ) => void
-  isEditable: boolean
-}
-
-export const DropZone: React.FC<DropZoneProps> = ({ index, onDrop, isEditable }) => {
-  const [{ isOver, canDrop }, dropRef] = useDrop({
-    accept: ['SLIDE', 'layout'],
-    drop: (item: any) => onDrop(item, index),
-    canDrop: () => isEditable,
-    collect: (monitor) => ({
-      isOver: !!monitor.isOver(),
-      canDrop: !!monitor.canDrop(),
-    }),
-  })
-
-  if (!isEditable) return null
-
-  return (
-    <div
-      ref={dropRef as unknown as React.RefObject<HTMLDivElement>}
+  onAdd: (index: number) => void
+}) => (
+  <div className="group relative flex h-6 w-full items-center justify-center">
+    <div className="absolute inset-x-4 h-px bg-transparent transition-colors group-hover:bg-primary/40" />
+    <button
+      onClick={(e) => {
+        e.stopPropagation()
+        onAdd(index)
+      }}
       className={cn(
-        'h-4 my-2 rounded-md transition-all duration-300',
-        'transform-gpu perspective-1000',
-        isOver && canDrop ? 'border-green-500 bg-green-100 scale-105 shadow-md' : 'border-gray-300',
-        canDrop ? 'hover:scale-105 hover:shadow-lg' : ''
+        "absolute flex size-6 cursor-pointer items-center justify-center",
+        "rounded-full border border-primary/50 bg-background shadow-sm",
+        "scale-75 opacity-0 transition-all duration-150",
+        "group-hover:scale-100 group-hover:opacity-100"
       )}
     >
-      {isOver && canDrop && (
-        <div className='h-full flex items-center justify-center text-green-600 text-sm'>Drop here</div>
-      )}
-    </div>
-  )
-}
+      <Plus strokeWidth={2.5} className="size-3 text-primary" />
+    </button>
+  </div>
+)
 
-interface DraggableSlideProps {
-  slide: Slide
+// ── Slide ─────────────────────────────────────────────────────────────────────
+interface SlideProps {
+  slide: S
   index: number
-  moveSlide: (dragIndex: number, hoverIndex: number) => void
   handleDelete: (id: string) => void
   isEditable: boolean
 }
 
-export const DraggableSlide: React.FC<DraggableSlideProps> = ({
-  slide,
-  index,
-  moveSlide,
-  handleDelete,
-  isEditable,
-}) => {
-  const ref = useRef(null)
-  const { currentSlide, setCurrentSlide, currentTheme, updateContentItem } = useSlideStore()
+export const Slide: React.FC<SlideProps> = React.memo(
+  ({ slide, index, handleDelete, isEditable }) => {
+    const ref = useRef(null)
+    const { currentTheme, currentSlide, setCurrentSlide, updateContentItem } =
+      useSlideStore()
 
-  const [{ isDragging }, drag] = useDrag({
-    type: 'SLIDE',
-    item: { index, type: 'SLIDE' },
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
-    }),
-    canDrag: isEditable,
-  })
+    const handleContentChange = useCallback(
+      (contentId: string, newContent: string | string[] | string[][]) => {
+        if (isEditable) updateContentItem(slide.id, contentId, newContent)
+      },
+      [slide.id, isEditable, updateContentItem]
+    )
 
-  const [_, drop] = useDrop({
-    accept: ['SLIDE', 'LAYOUT'],
-    hover(item: { index: number; type: string }) {
-      if (!ref.current || !isEditable) return
-      const dragIndex = item.index
-      const hoverIndex = index
-      if (item.type === 'SLIDE' && dragIndex !== hoverIndex) {
-        moveSlide(dragIndex, hoverIndex)
-        item.index = hoverIndex
-      }
-    },
-  })
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          "mx-auto w-full max-w-full rounded bg-background p-4",
+          "group relative flex transform-gpu flex-col transition-transform duration-300",
+          index === currentSlide && "ring-2 ring-primary",
+          slide.className
+        )}
+        style={{ backgroundImage: currentTheme.gradientBackground }}
+        onClick={() => setCurrentSlide(index)}
+      >
+        <div className="h-full w-full">
+          <MasterRecursiveComponent
+            content={slide.content}
+            isPreview={false}
+            slideId={slide.id}
+            isEditable={isEditable}
+            onContentChange={handleContentChange}
+          />
+        </div>
 
-  drag(drop(ref))
-
-  const handleContentChange = (contentId: string, newContent: string | string[] | string[][]) => {
-    if (isEditable) {
-      updateContentItem(slide.id, contentId, newContent)
-    }
-  }
-
-  return (
-    <div
-      ref={ref}
-      className={cn(
-        'w-full max-w-160 mx-auto bg-white rounded-lg shadow-md px-3 py-4 mb-6',
-        'flex flex-col relative transition-transform duration-300 transform-gpu hover:scale-[1.01] hover:shadow-xl',
-        index === currentSlide ? 'ring-2 ring-blue-500 ring-offset-2' : '',
-        slide.className,
-        isDragging ? 'opacity-50 scale-95' : 'opacity-100'
-      )}
-      style={{ backgroundImage: currentTheme.gradientBackground }}
-      onClick={() => setCurrentSlide(index)}
-    >
-      <div className='w-full h-full'>
-        <MasterRecursiveComponent
-          content={slide.content}
-          isPreview={false}
-          slideId={slide.id}
-          isEditable={isEditable}
-          onContentChange={handleContentChange}
-        />
-      </div>
-
-      {isEditable && (
-        <Popover>
-          <PopoverTrigger asChild className='absolute top-2 left-2'>
-            <Button size='sm' variant='outline'>
-              <EllipsisVertical className='w-5 h-5' />
-              <span className='sr-only'>Slide options</span>
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className='w-fit p-0'>
-            <div className='flex space-x-2'>
-              <Button variant='ghost' onClick={() => handleDelete(slide.id)}>
-                <Trash className='w-5 h-5 text-red-500' />
-                <span className='sr-only'>Delete slide</span>
+        {isEditable && (
+          <Popover>
+            <PopoverTrigger
+              asChild
+              className="absolute top-2 left-2 hidden group-hover:flex"
+            >
+              <Button size="icon-sm" variant="ghost">
+                <EllipsisVertical />
               </Button>
-            </div>
-          </PopoverContent>
-        </Popover>
-      )}
-    </div>
-  )
-}
+            </PopoverTrigger>
+            <PopoverContent className="w-fit p-0">
+              <div className="flex space-x-2">
+                <Button variant="ghost" onClick={() => handleDelete(slide.id)}>
+                  <Trash className="text-red-500" />
+                  Delete slide
+                </Button>
+              </div>
+            </PopoverContent>
+          </Popover>
+        )}
+      </div>
+    )
+  }
+)
 
-type Props = {
-  isEditable: boolean
-}
+// ── Editor ────────────────────────────────────────────────────────────────────
+type Props = { isEditable: boolean }
 
 const Editor = ({ isEditable }: Props) => {
   const {
     getOrderedSlides,
-    reorderSlides,
     slides,
     project,
     removeSlide,
-    addSlideAtIndex,
     currentSlide,
+    addSlideAtIndex,
   } = useSlideStore()
-
-  const { isSidebarOpen } = useSidebarStore()
 
   const orderedSlides = getOrderedSlides()
   const [loading, setLoading] = useState(true)
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [insertIndex, setInsertIndex] = useState<number | null>(null)
   const slideRefs = useRef<(HTMLDivElement | null)[]>([])
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-
-  const moveSlide = (dragIndex: number, hoverIndex: number) => {
-    if (isEditable) reorderSlides(dragIndex, hoverIndex)
-  }
-
-  const handleDrop = (item: any, dropIndex: number) => {
-    if (!isEditable) return
-    if (item.type === 'layout') {
-      addSlideAtIndex(
-        {
-          ...item.component,
-          id: uuidv4(),
-          slideOrder: dropIndex,
-        },
-        dropIndex
-      )
-    } else if (item.type === 'SLIDE' && item.index !== undefined) {
-      moveSlide(item.index, dropIndex)
-    }
-  }
 
   useEffect(() => {
     if (slideRefs.current[currentSlide]) {
       slideRefs.current[currentSlide]?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
+        behavior: "smooth",
+        block: "center",
       })
     }
   }, [currentSlide])
 
   useEffect(() => {
-    if (typeof window !== 'undefined') setLoading(false)
+    if (typeof window !== "undefined") setLoading(false)
   }, [])
 
   const saveSlides = useCallback(() => {
@@ -225,44 +193,91 @@ const Editor = ({ isEditable }: Props) => {
     }
   }, [slides, isEditable, project])
 
-  const handleDelete = (id: string) => {
-    if (isEditable) removeSlide(id)
+  const handleDelete = useCallback(
+    (id: string) => {
+      if (isEditable) removeSlide(id)
+    },
+    [isEditable, removeSlide]
+  )
+
+  const handleGapClick = (index: number) => {
+    setInsertIndex(index)
+    setDialogOpen(true)
+  }
+
+  const handleLayoutSelect = (layout: Layout) => {
+    if (insertIndex === null) return
+
+    const newSlide: S = {
+      id: "",
+      slideName: layout.component.slideName,
+      type: layout.component.type,
+      content: layout.component.content,
+      slideOrder: insertIndex,
+      className: layout.component.className,
+    }
+
+    addSlideAtIndex(newSlide, insertIndex)
+    setDialogOpen(false)
+    setInsertIndex(null)
   }
 
   return (
-    <div
-      className={cn(
-        'flex-1 flex flex-col h-full w-full mb-20 overflow-x-hidden px-2 sm:px-4 transition-all duration-300',
-        isSidebarOpen ? 'sm:ml-80' : 'sm:ml-0'
-      )}
-    >
-      {loading ? (
-        <div className='w-full flex flex-col space-y-6'>
-          <Skeleton className='h-52 w-full' />
-          <Skeleton className='h-52 w-full' />
-          <Skeleton className='h-52 w-full' />
-        </div>
-      ) : (
-        <ScrollArea className='flex-1 mt-8 overflow-x-hidden'>
-          <div className='px-0 sm:px-2 pb-6 space-y-6'>
-            {isEditable && <DropZone index={0} onDrop={handleDrop} isEditable={isEditable} />}
+    <>
+      <div
+        className={cn("flex h-full w-full flex-1 flex-col overflow-x-hidden")}
+      >
+        <ScrollArea className="flex-1 overflow-x-hidden">
+          <div className="flex flex-col">
+            {/* Gap before first slide — only show in edit mode */}
+            {isEditable && <SlideGap index={0} onAdd={handleGapClick} />}
+
             {orderedSlides.map((slide, index) => (
               <React.Fragment key={slide.id || index}>
-                <DraggableSlide
+                <Slide
                   slide={slide}
                   index={index}
-                  moveSlide={moveSlide}
                   handleDelete={handleDelete}
                   isEditable={isEditable}
                 />
-                {isEditable && <DropZone index={index + 1} onDrop={handleDrop} isEditable={isEditable} />}
+                {isEditable && (
+                  <SlideGap index={index + 1} onAdd={handleGapClick} />
+                )}
               </React.Fragment>
             ))}
           </div>
         </ScrollArea>
-      )}
-    </div>
+      </div>
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Add a slide</DialogTitle>
+          </DialogHeader>
+          <LayoutScrollArea className="h-96">
+            <div className="p-2">
+              {layouts.map((group) => (
+                <div key={group.name} className="mb-4">
+                  <h3 className="my-4 text-xs font-medium text-muted-foreground uppercase">
+                    {group.name}
+                  </h3>
+                  <div className="grid grid-cols-3 gap-2">
+                    {group.layouts.map((layout) => (
+                      <ClickableLayoutItem
+                        key={layout.layoutType}
+                        {...layout}
+                        onSelect={handleLayoutSelect}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </LayoutScrollArea>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }
 
-export default Editor;
+export default Editor

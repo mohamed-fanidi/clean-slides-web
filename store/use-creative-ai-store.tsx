@@ -18,11 +18,11 @@ const useCreativeAIStore = create<CreativeAIStore>()(
         set({ currentAiPrompt: prompt })
       },
       outlines: [],
-      addOutline: (outline: OutlineCard) => {
+      addOutline: (outline: OutlineCard) =>
         set((state) => ({
-          outlines: [outline, ...state.outlines],
-        }))
-      },
+          outlines: [...state.outlines, outline],
+        })),
+
       addMultipleOutlines: (outlines: OutlineCard[]) => {
         set(() => ({
           outlines: [...outlines],

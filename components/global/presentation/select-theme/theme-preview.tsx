@@ -1,214 +1,158 @@
-'use client'
+"use client"
 
-import { useSlideStore } from '@/store/use-slide-store'
-import { redirect, useParams, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { ArrowLeft, Palette } from 'lucide-react'
-import { Theme } from '@/lib/types'
-import ThemeCard from './theme-card'
-import ThemePicker from './theme-picker'
-import { themes } from '@/lib/constants'
-import { Dialog, DialogContent, DialogTrigger, DialogClose } from '@/components/ui/dialog'
-import { X } from 'lucide-react'
+import { generateLayouts } from "@/actions/chatgpt"
+import { Button } from "@/components/ui/button"
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel"
+import { themes } from "@/lib/constants"
+import { Theme } from "@/lib/types"
+import { useSlideStore } from "@/store/use-slide-store"
+import { cn } from "@/lib/utils"
+import { ArrowRight, ChevronLeft, Loader, Sparkles, Wand2 } from "lucide-react"
+import { useParams, useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
+import { toast } from "sonner"
 
 const ThemePreview = () => {
-  const params = useParams()
   const router = useRouter()
-  const { currentTheme, setCurrentTheme, project } = useSlideStore()
+  const params = useParams()
+  const { project, setSlides, currentTheme, setCurrentTheme } = useSlideStore()
   const [selectedTheme, setSelectedTheme] = useState<Theme>(currentTheme)
-  const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
 
-  // useEffect(() => {
-  //   if (project?.slides) router.push(`/presentation/${params.presentationId}`)
-  // }, [project])
+  useEffect(() => {
+    if (project?.slides) router.push(`/presentation/${params.presentationId}`)
+  }, [project])
 
   const applyTheme = (theme: Theme) => {
     setSelectedTheme(theme)
     setCurrentTheme(theme)
   }
 
-  return (
-    <div
-      className="min-h-screen w-full flex flex-col md:flex-row"
-      style={{
-        background: selectedTheme.backgroundColor,
-        color: selectedTheme.accentColor,
-        fontFamily: selectedTheme.fontFamily,
-      }}
-    >
-      <div className="grow pt-14 px-4 sm:px-6 md:px-8 overflow-y-auto">
-        <div className="flex justify-between items-center mb-6">
-          <Button
-            variant="outline"
-            // onClick={() => router.push('/new')}
-            onClick={() => redirect('/new')}
-            className="h-10 text-sm px-4"
-            style={{
-              background: selectedTheme.accentColor + '10',
-              color: selectedTheme.accentColor,
-              borderColor: selectedTheme.accentColor + '20',
-            }}
-          >
-            <ArrowLeft className="mr-2 w-4 h-4" /> Back
-          </Button>
+  const handleGenerateThemes = async () => {
+    setLoading(true)
+    if (!selectedTheme) {
+      toast.error("Error", { description: "Please select a theme" })
+      router.push("/new")
+      return
+    }
+    try {
+      const res = await generateLayouts(
+        params.presentationId as string,
+        currentTheme.name
+      )
+      if (res.status !== 200 && !res.data) {
+        throw new Error("Failed to generate layouts")
+      }
+      toast.success("Success", {
+        description: "Layouts generated successfully",
+      })
+      setSlides(res.data)
+      router.push(`/presentation/${project?.id}`)
+    } catch {
+      toast.error("Error", { description: "Failed to generate layouts" })
+    } finally {
+      setLoading(false)
+    }
+  }
 
-          <div className="md:hidden">
-            <Dialog open={open} onOpenChange={setOpen}>
-              <DialogTrigger asChild>
-                <Button
-                  className="h-10 text-sm px-4"
+  return (
+    <div className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col gap-12 px-4 py-12 sm:px-6">
+      <Button
+        onClick={() => router.back()}
+        variant="ghost"
+        size="sm"
+        className="w-fit gap-1 text-muted-foreground hover:text-foreground"
+      >
+        <ChevronLeft className="h-4 w-4" />
+        Back
+      </Button>
+
+      <div className="space-y-2 text-center">
+        <h1 className="text-4xl tracking-tighter">Pick a theme</h1>
+        <p className="text-sm text-muted-foreground">
+          Choose a visual style for your presentation
+        </p>
+      </div>
+
+      <Carousel opts={{ align: "start", loop: true }} className="w-full">
+        <CarouselContent>
+          {themes.map((theme) => {
+            const isSelected = selectedTheme.name === theme.name
+            return (
+              <CarouselItem
+                key={theme.name}
+                className="basis-full sm:basis-1/2 md:basis-1/3"
+              >
+                <button
+                  onClick={() => applyTheme(theme)}
+                  className={cn(
+                    "aspect-video w-full cursor-pointer rounded-xl border-3 p-5 text-left transition-all duration-200 focus:outline-none",
+                    isSelected
+                      ? "border-foreground/60"
+                      : "border-border hover:border-foreground/30"
+                  )}
                   style={{
-                    background: selectedTheme.accentColor,
-                    color: selectedTheme.fontColor,
+                    fontFamily: theme.fontFamily,
+                    background: theme.backgroundColor,
+                    color: theme.fontColor,
                   }}
                 >
-                  <Palette className="mr-2 w-4 h-4" /> Themes
-                </Button>
-              </DialogTrigger>
-              <DialogContent
-                className="w-[90vw] h-[80vh] p-0 bg-transparent shadow-none border-none"
-                style={{ backgroundColor: 'transparent' }}
-              >
-                {/* Close button (top-right) */}
-                <DialogClose asChild>
-                  <button
-                    className="absolute top-4 right-4 z-10 bg-black text-white rounded-full p-1 hover:opacity-80 transition"
-                    aria-label="Close"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </DialogClose>
-
-                {/* ThemePicker content */}
-                <div className="rounded-lg bg-white w-full h-full overflow-y-auto p-4 shadow-lg">
-                  <ThemePicker
-                    selectedTheme={selectedTheme}
-                    themes={themes}
-                    onThemeSelect={applyTheme}
-                  />
-                </div>
-              </DialogContent>
-            </Dialog>
-          </div>
-        </div>
-
-        <div className="relative w-full max-w-2xl mx-auto">
-          <ThemeCard
-            title="Main Preview"
-            description="This is the main theme preview card"
-            content={
-              <div className="space-y-4 text-sm">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="rounded-lg p-4" style={{ backgroundColor: selectedTheme.accentColor + '10' }}>
-                    <p style={{ color: selectedTheme.accentColor }}>
-                      This is a smart layout: it acts as a text box.
-                    </p>
-                  </div>
-                  <div className="rounded-lg p-4" style={{ backgroundColor: selectedTheme.accentColor + '10' }}>
-                    <p style={{ color: selectedTheme.accentColor }}>
-                      You can get these by typing /smart
-                    </p>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <Button
-                    className="h-10 text-sm w-full"
-                    style={{
-                      backgroundColor: selectedTheme.accentColor,
-                      color: selectedTheme.fontColor,
-                    }}
-                  >
-                    Primary
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="h-10 text-sm w-full"
-                    style={{
-                      backgroundColor: selectedTheme.accentColor,
-                      color: selectedTheme.fontColor,
-                    }}
-                  >
-                    Secondary
-                  </Button>
-                </div>
-              </div>
-            }
-            variant="main"
-            theme={selectedTheme}
-          />
-
-          {/* Left and Right Cards */}
-          <div className="hidden lg:flex justify-between mt-10 gap-4">
-            <ThemeCard
-              title="Quick Start"
-              description="Get up and running in no time"
-              content={
-                <div className="space-y-3 text-sm">
-                  <div className="rounded-lg p-4" style={{ backgroundColor: selectedTheme.accentColor + '10' }}>
-                    <ol className="list-decimal list-inside space-y-1" style={{ color: selectedTheme.accentColor }}>
-                      <li>Choose a theme</li>
-                      <li>Customize colors</li>
-                      <li>Add content</li>
-                      <li>Publish</li>
-                    </ol>
-                  </div>
-                  <Button
-                    className="h-10 text-sm w-full"
-                    style={{
-                      backgroundColor: selectedTheme.accentColor,
-                      color: selectedTheme.fontColor,
-                    }}
-                  >
-                    Get Started
-                  </Button>
-                </div>
-              }
-              variant="left"
-              theme={selectedTheme}
-            />
-            <div className="pt-12">
-              <ThemeCard
-                title="Theme Features"
-                description="Discover what our themes can do"
-                content={
-                  <div className="space-y-3 text-sm">
-                    <div className="rounded-lg p-4" style={{ backgroundColor: selectedTheme.accentColor + '10' }}>
-                      <ul className="list-disc list-inside space-y-1" style={{ color: selectedTheme.accentColor }}>
-                        <li>Responsive</li>
-                        <li>Dark & Light</li>
-                        <li>Custom Colors</li>
-                        <li>Accessibility</li>
-                      </ul>
-                    </div>
-                    <Button
-                      variant="outline"
-                      className="h-10 text-sm w-full"
-                      style={{
-                        backgroundColor: selectedTheme.accentColor,
-                        color: selectedTheme.fontColor,
-                      }}
+                  <div className="space-y-2">
+                    <div
+                      className="leading-tighter text-xl font-bold capitalize"
+                      style={{ color: theme.accentColor }}
                     >
-                      Explore
-                    </Button>
+                      {theme.name}
+                    </div>
+                    <div className="text-xs opacity-70">
+                      This is body text &{" "}
+                      <span style={{ color: theme.accentColor }}>link</span>
+                    </div>
                   </div>
-                }
-                variant="right"
-                theme={selectedTheme}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
+                </button>
+              </CarouselItem>
+            )
+          })}
+        </CarouselContent>
 
-      {/* Sidebar ThemePicker on Desktop */}
-      <div className="hidden md:block md:w-87.5 border-l">
-        <ThemePicker
-          selectedTheme={selectedTheme}
-          themes={themes}
-          onThemeSelect={applyTheme}
-        />
-      </div>
+        <CarouselPrevious className="-left-4 sm:-left-10" />
+        <CarouselNext className="-right-4 sm:-right-10" />
+      </Carousel>
+
+      <p className="text-center text-xs text-muted-foreground">
+        Selected:{" "}
+        <span className="font-medium text-foreground">
+          {selectedTheme.name}
+        </span>
+      </p>
+
+      <Button
+        className="mx-auto w-fit text-sm font-medium transition-opacity duration-200 hover:opacity-90"
+        style={{
+          background: selectedTheme.accentColor,
+          color: selectedTheme.backgroundColor,
+        }}
+        onClick={handleGenerateThemes}
+        disabled={loading}
+      >
+        {loading ? (
+          <>
+            <Loader className="animate-spin" />
+            Generating…
+          </>
+        ) : (
+          <>
+            Generate Presentation
+            <ArrowRight />
+          </>
+        )}
+      </Button>
     </div>
   )
 }

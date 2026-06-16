@@ -73,6 +73,7 @@ export interface Slide {
 }
 
 export interface Theme {
+  image?: string
   name: string
   fontFamily: string
   fontColor: string
@@ -91,37 +92,35 @@ export interface OutlineCard {
   order: number
 }
 
-
 export interface LayoutSlides {
-    slideName : string 
-    content : ContentItem
-    className? : string 
-    type : string
+  slideName: string
+  content: ContentItem
+  className?: string
+  type: string
 }
 
-
 export interface Layout {
-    name :string
-    icon : React.FC
-    type : string
-    component : LayoutSlides
-    layoutType : string
+  name: string
+  icon: React.FC
+  type: string
+  component: LayoutSlides
+  layoutType: string
 }
 
 export interface LayoutGroup {
-    name : string
-    layouts : Layout[]
+  name: string
+  layouts: Layout[]
 }
 
 interface Component {
-  name: string;
-  icon: string;
-  type: string;
-  component: ContentItem;
-  componentType: string;
+  name: string
+  icon: string
+  type: string
+  component: ContentItem
+  componentType: string
 }
 
 export interface ComponentGroup {
-  name: string;
-  components: Component[];
+  name: string
+  components: Component[]
 }

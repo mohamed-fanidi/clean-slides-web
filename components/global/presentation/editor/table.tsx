@@ -1,13 +1,13 @@
-'use client'
+"use client"
 
 import {
   ResizableHandle,
   ResizablePanel,
-  ResizablePanelGroup
-} from '@/components/ui/resizable'
-import { useSlideStore } from '@/store/use-slide-store'
-import { cn } from '@/lib/utils'
-import React, { useState } from 'react'
+  ResizablePanelGroup,
+} from "@/components/ui/resizable"
+import { useSlideStore } from "@/store/use-slide-store"
+import { cn } from "@/lib/utils"
+import React, { useState } from "react"
 
 interface TableProps {
   content: string[][]
@@ -26,7 +26,7 @@ const Table = ({
   isSidebar = false,
   onChange,
   initialColSize = 3,
-  initialRowSize = 3
+  initialRowSize = 3,
 }: TableProps) => {
   const { currentTheme } = useSlideStore()
 
@@ -34,7 +34,7 @@ const Table = ({
     if (!content?.length || !content[0]?.length) {
       return Array(initialRowSize)
         .fill(null)
-        .map(() => Array(initialColSize).fill(''))
+        .map(() => Array(initialColSize).fill(""))
     }
     return content
   })
@@ -47,7 +47,6 @@ const Table = ({
         : row
     )
     setTableData(newData)
-    onChange(newData)
   }
 
   // 🪄 Preview / Sidebar Compact Table
@@ -55,14 +54,14 @@ const Table = ({
     return (
       <div
         className={cn(
-          'overflow-x-auto w-full max-w-full',
-          isSidebar ? 'text-[0.7rem] leading-tight' : 'text-xs'
+          "w-full max-w-full overflow-x-auto",
+          isSidebar ? "text-[0.7rem] leading-tight" : "text-xs"
         )}
       >
         <table
           className={cn(
-            'w-full border border-gray-300 text-left table-fixed',
-            isSidebar ? '' : 'shadow-md rounded-lg'
+            "w-full table-fixed border border-gray-300 text-left",
+            isSidebar ? "" : "rounded-lg shadow-md"
           )}
         >
           <thead className="bg-gray-100">
@@ -71,16 +70,16 @@ const Table = ({
                 <th
                   key={index}
                   className={cn(
-                    'border font-medium text-gray-700 truncate',
-                    isSidebar ? 'p-1' : 'p-2'
+                    "truncate border font-medium text-gray-700",
+                    isSidebar ? "p-1" : "p-2"
                   )}
                   style={{
                     width: `${100 / tableData[0].length}%`,
-                    minWidth: isSidebar ? '48px' : undefined,
-                    maxWidth: isSidebar ? '100px' : undefined
+                    minWidth: isSidebar ? "48px" : undefined,
+                    maxWidth: isSidebar ? "100px" : undefined,
                   }}
                 >
-                  {cell || '—'}
+                  {cell || "—"}
                 </th>
               ))}
             </tr>
@@ -92,11 +91,11 @@ const Table = ({
                   <td
                     key={cellIndex}
                     className={cn(
-                      'border text-gray-800 align-top wrap-break-word',
-                      isSidebar ? 'p-1' : 'p-2'
+                      "border align-top wrap-break-word text-gray-800",
+                      isSidebar ? "p-1" : "p-2"
                     )}
                   >
-                    {cell || '—'}
+                    {cell || "—"}
                   </td>
                 ))}
               </tr>
@@ -110,25 +109,25 @@ const Table = ({
   // 🧑‍💻 Main Editor Resizable Table
   return (
     <div
-      className="w-full h-full relative rounded-xl shadow-lg backdrop-blur-md"
+      className="relative h-full w-full rounded-xl shadow-lg backdrop-blur-md"
       style={{
         background:
           currentTheme.gradientBackground || currentTheme.backgroundColor,
-        borderRadius: '12px',
-        boxShadow: `0 4px 30px ${currentTheme.accentColor}55`
+        borderRadius: "12px",
+        boxShadow: `0 4px 30px ${currentTheme.accentColor}55`,
       }}
     >
       <ResizablePanelGroup
         orientation="vertical"
         className={cn(
-          'h-full w-full rounded-lg border border-gray-300/50 overflow-hidden',
+          "h-full w-full overflow-hidden rounded-lg border border-gray-300/50",
           initialColSize === 2
-            ? 'min-h-25'
+            ? "min-h-25"
             : initialColSize === 3
-            ? 'min-h-37.5'
-            : initialColSize === 4
-            ? 'min-h-50'
-            : 'min-h-25'
+              ? "min-h-37.5"
+              : initialColSize === 4
+                ? "min-h-50"
+                : "min-h-25"
         )}
       >
         {tableData.map((row, rowIndex) => (
@@ -139,7 +138,7 @@ const Table = ({
             <ResizablePanel defaultSize={100 / tableData.length}>
               <ResizablePanelGroup
                 orientation="horizontal"
-                className="w-full h-full"
+                className="h-full w-full"
               >
                 {row.map((cell, colIndex) => (
                   <React.Fragment key={colIndex}>
@@ -148,19 +147,20 @@ const Table = ({
                     )}
                     <ResizablePanel
                       defaultSize={100 / row.length}
-                      className="w-full h-full min-h-9 transition-all duration-300 hover:scale-[1.01]"
+                      className="h-full min-h-9 w-full transition-all duration-300 hover:scale-[1.01]"
                     >
-                      <div className="relative w-full h-full">
+                      <div className="relative h-full w-full">
                         <input
                           value={cell}
                           onChange={(e) =>
                             updateCell(rowIndex, colIndex, e.target.value)
                           }
-                          className="w-full h-full p-3 bg-white/20 backdrop-blur-xl border border-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md text-sm placeholder:italic placeholder:text-gray-400"
+                          onBlur={() => onChange(tableData)}
+                          className="h-full w-full rounded-md border border-white/20 bg-white/20 p-3 text-sm backdrop-blur-xl placeholder:text-gray-400 placeholder:italic focus:ring-2 focus:ring-blue-500 focus:outline-none"
                           style={{
                             color: currentTheme.fontColor,
-                            whiteSpace: 'normal',
-                            wordBreak: 'break-word'
+                            whiteSpace: "normal",
+                            wordBreak: "break-word",
                           }}
                           placeholder="Type here"
                           readOnly={!isEditable}

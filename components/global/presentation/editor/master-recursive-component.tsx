@@ -1,104 +1,133 @@
-'use client';
+"use client"
 
-import React, { useCallback } from 'react';
-import { cn } from '@/lib/utils';
-import {
-  Heading1,
-  Heading2,
-  Heading3,
-  Heading4,
-  Title,
-} from './headings';
-import DropZone from './drop-zone';
-import Paragraph from './paragraph';
-import Table from './table';
-import ColumnComponent from './column-component';
-import CustomImage from './image';
-import BlockQuote from './block-quote';
-import NumberedList, {
-  BulletList,
-  TodoList,
-} from './list-component';
-import CalloutBox from './callout-box';
-import CodeBlock from './code-block';
-import TableOfContent from './table-of-content';
-import Divider from './divider';
-import { ContentItem } from '@/lib/types';
+import React, { useCallback } from "react"
+import { cn } from "@/lib/utils"
+import { Heading1, Heading2, Heading3, Heading4, Title } from "./headings"
+import DropZone from "./drop-zone"
+import Paragraph from "./paragraph"
+import Table from "./table"
+import ColumnComponent from "./column-component"
+import CustomImage from "./image"
+import BlockQuote from "./block-quote"
+import NumberedList, { BulletList, TodoList } from "./list-component"
+import CalloutBox from "./callout-box"
+import CodeBlock from "./code-block"
+import TableOfContent from "./table-of-content"
+import Divider from "./divider"
+import { ContentItem } from "@/lib/types"
 
 type MasterRecursiveComponentProps = {
-  content: ContentItem | ContentItem[];
+  content: ContentItem | ContentItem[]
   onContentChange: (
     contentId: string,
     newContent: string | string[] | string[][]
-  ) => void;
-  isPreview?: boolean;
-  isEditable?: boolean;
-  slideId: string;
-  index?: number;
-  isSidebar?: boolean;
-};
+  ) => void
+  isPreview?: boolean
+  isEditable?: boolean
+  slideId: string
+  index?: number
+  isSidebar?: boolean
+}
 
 const ContentRenderer: React.FC<MasterRecursiveComponentProps> = React.memo(
-  ({ content, onContentChange, slideId, isSidebar, index, isPreview, isEditable }) => {
-    if (!content || typeof content !== 'object' || !('id' in content) || !('type' in content)) {
-      console.warn('❌ Invalid content item in ContentRenderer:', content);
-      return null;
+  ({
+    content,
+    onContentChange,
+    slideId,
+    isSidebar,
+    index,
+    isPreview,
+    isEditable,
+  }) => {
+    if (
+      !content ||
+      typeof content !== "object" ||
+      !("id" in content) ||
+      !("type" in content)
+    ) {
+      console.warn("❌ Invalid content item in ContentRenderer:", content)
+      return null
     }
 
     const handleChange = useCallback(
       (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        onContentChange(content.id, e.target.value);
+        onContentChange(content.id, e.target.value)
       },
       [content.id, onContentChange]
-    );
+    )
 
     const commonProps = {
-      placeholder: (content as any).placeholder ?? '',
-      value: typeof content.content === 'string' ? content.content : '',
+      placeholder: (content as any).placeholder ?? "",
+      value: typeof content.content === "string" ? content.content : "",
       onChange: handleChange,
       isPreview,
       isSidebar,
-    };
+    }
 
     const Wrapper = ({ children }: { children: React.ReactNode }) => (
       <div
         className={cn(
-          'w-full h-full overflow-hidden wrap-break-word whitespace-pre-wrap',
-          isSidebar ? 'text-[10px]' : 'text-base'
+          "h-full w-full overflow-hidden wrap-break-word whitespace-pre-wrap"
         )}
       >
         {children}
       </div>
-    );
+    )
 
     switch (content.type) {
-      case 'heading1':
-        return <Wrapper><Heading1 {...commonProps} /></Wrapper>;
-      case 'heading2':
-        return <Wrapper><Heading2 {...commonProps} /></Wrapper>;
-      case 'heading3':
-        return <Wrapper><Heading3 {...commonProps} /></Wrapper>;
-      case 'heading4':
-        return <Wrapper><Heading4 {...commonProps} /></Wrapper>;
-      case 'title':
-        return <Wrapper><Title {...commonProps} /></Wrapper>;
-      case 'paragraph':
-        return <Wrapper><Paragraph {...commonProps} /></Wrapper>;
+      case "heading1":
+        return (
+          <Wrapper>
+            <Heading1 {...commonProps} />
+          </Wrapper>
+        )
+      case "heading2":
+        return (
+          <Wrapper>
+            <Heading2 {...commonProps} />
+          </Wrapper>
+        )
+      case "heading3":
+        return (
+          <Wrapper>
+            <Heading3 {...commonProps} />
+          </Wrapper>
+        )
+      case "heading4":
+        return (
+          <Wrapper>
+            <Heading4 {...commonProps} />
+          </Wrapper>
+        )
+      case "title":
+        return (
+          <Wrapper>
+            <Title {...commonProps} />
+          </Wrapper>
+        )
+      case "paragraph":
+        return (
+          <Wrapper>
+            <Paragraph {...commonProps} />
+          </Wrapper>
+        )
 
-      case 'table': {
+      case "table": {
         const isValidTableData =
           Array.isArray(content.content) &&
           Array.isArray(content.content[0]) &&
-          typeof content.content[0][0] === 'string';
+          typeof content.content[0][0] === "string"
 
-        const safeTableContent: string[][] = isValidTableData ? (content.content as string[][]) : [['']];
+        const safeTableContent: string[][] = isValidTableData
+          ? (content.content as string[][])
+          : [[""]]
 
         return (
           <Wrapper>
             <Table
               content={safeTableContent}
               onChange={(newContent) =>
-                onContentChange(content.id, newContent || [['']])
+                onContentChange(content.id, newContent || [[""]])
               }
               initialRowSize={content.initialColumns || 2}
               initialColSize={content.initialRows || 2}
@@ -106,13 +135,16 @@ const ContentRenderer: React.FC<MasterRecursiveComponentProps> = React.memo(
               isEditable={isEditable}
             />
           </Wrapper>
-        );
+        )
       }
 
-      case 'resizable-column': {
+      case "resizable-column": {
         const colContent = Array.isArray(content.content)
-          ? content.content.filter((item): item is ContentItem => typeof item === 'object' && item !== null && 'type' in item)
-          : [];
+          ? content.content.filter(
+              (item): item is ContentItem =>
+                typeof item === "object" && item !== null && "type" in item
+            )
+          : []
 
         return (
           <Wrapper>
@@ -125,15 +157,15 @@ const ContentRenderer: React.FC<MasterRecursiveComponentProps> = React.memo(
               isEditable={isEditable}
             />
           </Wrapper>
-        );
+        )
       }
 
-      case 'image':
+      case "image":
         return (
           <Wrapper>
             <CustomImage
               src={content.content as string}
-              alt={content.alt || 'image'}
+              alt={content.alt || "image"}
               className={content.className}
               isPreview={isPreview}
               contentId={content.id}
@@ -142,29 +174,29 @@ const ContentRenderer: React.FC<MasterRecursiveComponentProps> = React.memo(
               isSidebar={isSidebar}
             />
           </Wrapper>
-        );
+        )
 
-      case 'blockquote':
+      case "blockquote":
         return (
           <Wrapper>
             <BlockQuote>
               <Paragraph {...commonProps} />
             </BlockQuote>
           </Wrapper>
-        );
+        )
 
-      case 'numberedList':
-      case 'bulletList':
-      case 'todoList': {
+      case "numberedList":
+      case "bulletList":
+      case "todoList": {
         const ListComponent = {
           numberedList: NumberedList,
           bulletList: BulletList,
           todoList: TodoList,
-        }[content.type];
+        }[content.type]
 
         const listItems = Array.isArray(content.content)
           ? (content.content as string[])
-          : [];
+          : []
 
         return (
           <Wrapper>
@@ -174,16 +206,16 @@ const ContentRenderer: React.FC<MasterRecursiveComponentProps> = React.memo(
               className={content.className}
             />
           </Wrapper>
-        );
+        )
       }
 
-      case 'calloutBox': {
+      case "calloutBox": {
         const normalizeCalloutType = (
           type?: string
-        ): 'success' | 'warning' | 'info' | 'question' | 'caution' => {
-          const valid = ['success', 'warning', 'info', 'question', 'caution'];
-          return valid.includes(type?.trim() || '') ? (type as any) : 'info';
-        };
+        ): "success" | "warning" | "info" | "question" | "caution" => {
+          const valid = ["success", "warning", "info", "question", "caution"]
+          return valid.includes(type?.trim() || "") ? (type as any) : "info"
+        }
 
         return (
           <Wrapper>
@@ -194,10 +226,10 @@ const ContentRenderer: React.FC<MasterRecursiveComponentProps> = React.memo(
               <Paragraph {...commonProps} />
             </CalloutBox>
           </Wrapper>
-        );
+        )
       }
 
-      case 'codeBlock':
+      case "codeBlock":
         return (
           <Wrapper>
             <CodeBlock
@@ -207,34 +239,52 @@ const ContentRenderer: React.FC<MasterRecursiveComponentProps> = React.memo(
               className={content.className}
             />
           </Wrapper>
-        );
+        )
 
-      case 'tableOfContents':
+      case "tableOfContents":
         return (
           <Wrapper>
             <TableOfContent
-              items={Array.isArray(content.content) ? (content.content as string[]) : []}
+              items={
+                Array.isArray(content.content)
+                  ? (content.content as string[])
+                  : []
+              }
               onItemClick={(id) => console.log(`Navigate to section: ${id}`)}
               className={content.className}
             />
           </Wrapper>
-        );
+        )
 
-      case 'divider':
-        return <Wrapper><Divider className={content.className} /></Wrapper>;
+      case "divider":
+        return (
+          <Wrapper>
+            <Divider className={content.className} />
+          </Wrapper>
+        )
 
-      case 'column': {
+      case "column": {
         const columnItems = Array.isArray(content.content)
-          ? content.content.filter((item): item is ContentItem => typeof item === 'object' && item !== null && 'type' in item)
-          : [];
+          ? content.content.filter(
+              (item): item is ContentItem =>
+                typeof item === "object" && item !== null && "type" in item
+            )
+          : []
 
         return (
           <Wrapper>
             {columnItems.map((subItem, subIndex) => (
               <React.Fragment key={subItem.id ?? `item-${subIndex}`}>
-                {!isPreview && !subItem.restrictToDrop && subIndex === 0 && isEditable && (
-                  <DropZone index={0} parentId={content.id} slideId={slideId} />
-                )}
+                {!isPreview &&
+                  !subItem.restrictToDrop &&
+                  subIndex === 0 &&
+                  isEditable && (
+                    <DropZone
+                      index={0}
+                      parentId={content.id}
+                      slideId={slideId}
+                    />
+                  )}
                 <MasterRecursiveComponent
                   content={subItem}
                   onContentChange={onContentChange}
@@ -245,55 +295,68 @@ const ContentRenderer: React.FC<MasterRecursiveComponentProps> = React.memo(
                   isSidebar={isSidebar}
                 />
                 {!isPreview && !subItem.restrictToDrop && isEditable && (
-                  <DropZone index={subIndex + 1} parentId={content.id} slideId={slideId} />
+                  <DropZone
+                    index={subIndex + 1}
+                    parentId={content.id}
+                    slideId={slideId}
+                  />
                 )}
               </React.Fragment>
             ))}
           </Wrapper>
-        );
+        )
       }
 
       default:
-        return null;
+        return null
     }
   }
-);
+)
 
-ContentRenderer.displayName = 'ContentRenderer';
+ContentRenderer.displayName = "ContentRenderer"
 
-export const MasterRecursiveComponent: React.FC<MasterRecursiveComponentProps> = React.memo(
-  ({ content, onContentChange, slideId, index, isEditable = true, isPreview = false, isSidebar = false }) => {
-    if (Array.isArray(content)) {
+export const MasterRecursiveComponent: React.FC<MasterRecursiveComponentProps> =
+  React.memo(
+    ({
+      content,
+      onContentChange,
+      slideId,
+      index,
+      isEditable = true,
+      isPreview = false,
+      isSidebar = false,
+    }) => {
+      if (Array.isArray(content)) {
+        return (
+          <>
+            {content.map((item, i) => (
+              <MasterRecursiveComponent
+                key={item.id ?? `item-${i}`}
+                content={item}
+                onContentChange={onContentChange}
+                slideId={slideId}
+                index={i}
+                isEditable={isEditable}
+                isPreview={isPreview}
+                isSidebar={isSidebar}
+              />
+            ))}
+          </>
+        )
+      }
+
       return (
-        <>
-          {content.map((item, i) => (
-            <MasterRecursiveComponent
-              key={item.id ?? `item-${i}`}
-              content={item}
-              onContentChange={onContentChange}
-              slideId={slideId}
-              index={i}
-              isEditable={isEditable}
-              isPreview={isPreview}
-              isSidebar={isSidebar}
-            />
-          ))}
-        </>
-      );
+        <ContentRenderer
+          content={content}
+          onContentChange={onContentChange}
+          isPreview={isPreview}
+          isEditable={isEditable}
+          slideId={slideId}
+          index={index}
+          isSidebar={isSidebar}
+        />
+      )
     }
+  )
 
-    return (
-      <ContentRenderer
-        content={content}
-        onContentChange={onContentChange}
-        isPreview={isPreview}
-        isEditable={isEditable}
-        slideId={slideId}
-        index={index}
-        isSidebar={isSidebar}
-      />
-    );
-  }
-);
-
-MasterRecursiveComponent.displayName = 'MasterRecursiveComponent';
+MasterRecursiveComponent.displayName = "MasterRecursiveComponent"

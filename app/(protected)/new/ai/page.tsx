@@ -1,8 +1,15 @@
 "use client"
 import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, Loader, Loader2, RotateCcw } from "lucide-react"
+import {
+  ArrowRight,
+  ArrowUp,
+  ChevronLeft,
+  Loader,
+  Plus,
+  RotateCcw,
+} from "lucide-react"
 import { Input } from "@/components/ui/input"
 import useCreativeAIStore from "@/store/use-creative-ai-store"
 import {
@@ -21,7 +28,6 @@ import { useSlideStore } from "@/store/use-slide-store"
 import { generateCreativePrompt } from "@/actions/chatgpt"
 
 const CreateAI = () => {
-
   const router = useRouter()
   const { setProject } = useSlideStore()
   const [editingCard, setEditingCard] = useState<string | null>(null)
@@ -36,7 +42,7 @@ const CreateAI = () => {
     addOutline,
     addMultipleOutlines,
   } = useCreativeAIStore()
-  const [noOfCards, setNoOfCards] = useState(3)
+  const [noOfCards, setNoOfCards] = useState(0)
 
   const resetCards = () => {
     setEditingCard(null)
@@ -118,83 +124,84 @@ const CreateAI = () => {
     }
   }
 
-  useEffect(() => {
-    setNoOfCards(outlines.length)
-  }, [outlines.length])
-
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-6 px-4 sm:px-6 lg:px-8">
-      <Button variant="outline" className="mb-4">
-        <ChevronLeft className="mr-2 h-4 w-4"></ChevronLeft>
+    <div className="mx-auto flex min-h-dvh w-full max-w-2xl flex-col gap-10 px-4 py-12 sm:px-6">
+      <Button
+        onClick={() => router.back()}
+        variant="ghost"
+        size="sm"
+        className="w-fit"
+      >
+        <ChevronLeft />
         Back
       </Button>
-      <div className="space-y-2 text-center">
-        <h1 className="text-4xl font-bold text-primary">
-          {/*WARN:className="text-vivid" doesn't seem to do anything*/}
-          Generate with <span className="text-vivid">Creative AI</span>
-        </h1>
-        <p className="text-muted-white"> What would like to create today ?</p>
-      </div>
-      <div className="rounded-xl bg-primary/10 p-4">
-        <div className="flex flex-col items-center justify-between gap-3 rounded-xl sm:flex-row">
+
+      <h1 className="text-center text-4xl tracking-tighter">
+        What would you like to <br /> create today?
+      </h1>
+
+      <div className="rounded-xl border border-border bg-muted/40 px-4 py-3.5">
+        <div className="flex items-center gap-2">
           <Input
-            placeholder="Enter Prompt and add to the cards ... "
-            className="grow border-0 bg-transparent p-0 text-base shadow-none focus-visible:ring-0 sm:text-xl"
             required
             value={currentAiPrompt || ""}
             onChange={(e) => setCurrentAiPrompt(e.target.value)}
+            placeholder="Describe your presentation…"
+            className="border-0 bg-transparent px-0 text-base shadow-none placeholder:text-muted-foreground/60 focus-visible:ring-0"
           />
-          <div className="flex items-center gap-3">
+          <Button
+            onClick={generateOutline}
+            disabled={isGenerating || !currentAiPrompt || !noOfCards}
+          >
+            {isGenerating ? (
+              <>
+                <Loader className="animate-spin" />
+                Generating ...
+              </>
+            ) : (
+              <>
+                Generate Outline
+                <ArrowUp />
+              </>
+            )}
+          </Button>
+        </div>
+
+        <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
+          <span className="text-xs text-muted-foreground">Outline cards</span>
+          <div className="flex items-center gap-2">
             <Select
-              value={noOfCards.toString()}
+              value={noOfCards ? noOfCards.toString() : undefined}
               onValueChange={(value) => setNoOfCards(parseInt(value))}
             >
-              <SelectTrigger className="w-fit gap-2 font-semibold shadow-xl">
-                <SelectValue placeholder="Select number of cards " />
+              <SelectTrigger className="h-8 w-max text-xs">
+                <SelectValue placeholder="Slide Count" />
               </SelectTrigger>
-              <SelectContent className="w-fit">
-                {Array.from({ length: 6 }, (_, idx) => idx + 1).map((num) => (
-                  <SelectItem
-                    key={num}
-                    value={num.toString()}
-                    className="font-semibold"
-                  >
-                    {num} {num === 1 ? "Card" : "Cards"}
+
+              <SelectContent>
+                {Array.from({ length: 6 }, (_, i) => i + 1).map((n) => (
+                  <SelectItem key={n} value={n.toString()} className="text-xs">
+                    {n} {n === 1 ? "Card" : "Cards"}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+
             <Button
-              variant="destructive"
-              onClick={resetCards}
+              variant="ghost"
               size="icon"
-              aria-label="Reset cards"
+              onClick={resetCards}
+              className="text-muted-foreground hover:text-foreground"
+              aria-label="Reset"
             >
-              <RotateCcw className="h-4 w-4"></RotateCcw>
+              <RotateCcw className="size-3.5" />
             </Button>
           </div>
         </div>
       </div>
-      <div className="flex w-full items-center justify-center">
-        <Button
-          className="flex items-center gap-2 text-lg font-medium"
-          onClick={generateOutline}
-          disabled={isGenerating}
-        >
-          {isGenerating ? (
-            <>
-              <Loader2 className="mr-2 animate-spin" />
-              Generating ...
-            </>
-          ) : (
-            "Generate Outline"
-          )}
-        </Button>
-      </div>
 
       <CardList
         outlines={outlines}
-        addOutline={addOutline}
         addMultipleOutlines={addMultipleOutlines}
         editingCard={editingCard}
         selectedCard={selectedCard}
@@ -209,20 +216,43 @@ const CreateAI = () => {
           setEditText(title)
         }}
       />
+
       {outlines.length > 0 && (
-        <Button
-          className="w-full"
-          onClick={handleGenerate}
-          disabled={isGenerating}
-        >
-          {isGenerating ? (
-            <>
-              <Loader className="mr-2 animate-spin" /> Generating...
-            </>
-          ) : (
-            "Generate Slides"
-          )}
-        </Button>
+        <div className="-mt-8 flex flex-col gap-4">
+          <Button
+            variant="secondary"
+            size="lg"
+            className="w-full"
+            onClick={() =>
+              addOutline({
+                id: crypto.randomUUID(),
+                title: "New Section - double click to edit it",
+                order: outlines.length + 1,
+              })
+            }
+            disabled={isGenerating}
+          >
+            <Plus />
+            Add Outline
+          </Button>
+          <hr />
+          <Button
+            className="mx-auto mt-4 w-fit"
+            onClick={handleGenerate}
+            disabled={isGenerating}
+          >
+            {isGenerating ? (
+              <>
+                <Loader className="animate-spin" /> Generating...
+              </>
+            ) : (
+              <>
+                Generate Slides
+                <ArrowRight />
+              </>
+            )}
+          </Button>
+        </div>
       )}
     </div>
   )

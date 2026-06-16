@@ -1,56 +1,62 @@
-'use client';
+"use client"
 
-import { Slide } from '@/lib/types';
-import { cn } from '@/lib/utils';
-import { useSlideStore } from '@/store/use-slide-store';
-import { MasterRecursiveComponent } from '../editor/master-recursive-component';
+import { Slide } from "@/lib/types"
+import { cn } from "@/lib/utils"
+import { useSlideStore } from "@/store/use-slide-store"
+import { MasterRecursiveComponent } from "../editor/master-recursive-component"
 
 type Props = {
-  slide: Slide | undefined;
-  isActive: boolean;
-  index: number;
-  isSidebar?: boolean;
-};
+  slide: Slide | undefined
+  isActive: boolean
+  index: number
+  isSidebar?: boolean
+}
 
-const ScaledPreview = ({ slide, isActive, index, isSidebar = false }: Props) => {
-  const { currentTheme } = useSlideStore();
+const ScaledPreview = ({
+  slide,
+  isActive,
+  index,
+  isSidebar = false,
+}: Props) => {
+  const { currentTheme } = useSlideStore()
 
-  if (!slide || !slide.id || !slide.content) return null;
+  if (!slide || !slide.content) return null
 
-  // Original slide dimensions
-  const realWidth = 1080;
-  const realHeight = 720;
-
-  // Sidebar preview thumbnail size
-  const thumbnailWidth = 276;
-  const scale = thumbnailWidth / realWidth;
-  const scaledHeight = realHeight * scale;
+  const realWidth = 1080
+  const realHeight = 720
+  const thumbnailWidth = 200
+  const scale = thumbnailWidth / realWidth
+  const scaledHeight = realHeight * scale
 
   return (
     <div
       className={cn(
-        'relative rounded-xl overflow-hidden shadow-md transition-all duration-300 transform bg-white',
+        "relative transform overflow-hidden rounded-xl bg-white shadow-md transition-all duration-300",
         isActive
-          ? 'ring-2 ring-blue-500 ring-offset-2 scale-[1.01]'
-          : 'hover:scale-[1.02] hover:shadow-lg'
+          ? "scale-[1.01] ring-2 ring-blue-500 ring-offset-2"
+          : "hover:scale-[1.02] hover:shadow-lg"
       )}
       style={{
         width: `${thumbnailWidth}px`,
-        height: `${scaledHeight}px`,
+        height: `${scaledHeight}px`, // ✅ outer box matches scaled height
         fontFamily: currentTheme.fontFamily,
         backgroundColor: currentTheme.slideBackgroundColor,
         backgroundImage: currentTheme.gradientBackground,
         color: currentTheme.accentColor,
-        position: 'relative',
+        position: "relative",
+        overflow: "hidden", // ✅ clips the oversized inner div
       }}
     >
       <div
         style={{
           transform: `scale(${scale})`,
-          transformOrigin: 'top left',
-          width: `${realWidth}px`,
+          transformOrigin: "top left", // ✅ scales from top-left corner
+          width: `${realWidth}px`, // full 1080px, clipped by parent
           height: `${realHeight}px`,
-          pointerEvents: 'none',
+          pointerEvents: "none",
+          position: "absolute", // ✅ takes it out of flow so it doesn't push layout
+          top: 0,
+          left: 0,
         }}
       >
         <MasterRecursiveComponent
@@ -63,7 +69,7 @@ const ScaledPreview = ({ slide, isActive, index, isSidebar = false }: Props) => 
         />
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default ScaledPreview;
+export default ScaledPreview

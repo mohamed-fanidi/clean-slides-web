@@ -1,13 +1,38 @@
 import type { SidebarData, Theme } from "@/lib/types"
-import { ComponentGroup, LayoutGroup } from "./types";
+import { ComponentGroup, LayoutGroup } from "./types"
 import {
   Home,
   Palette,
   TrashBinMinimalistic,
   Widget4,
 } from "@solar-icons/react"
-import { BlankCardIcon, FourColumnsIcon, FourImageColumnsIcon, ImageAndTextIcon, TextAndImageIcon, ThreeColumnsIcon, ThreeColumnsWithHeadingsIcon, ThreeImageColumnsIcon, TwoColumnsIcon, TwoColumnsWithHeadingsIcon, TwoImageColumnsIcon } from "./icon-component";
-import { BulletListComponent, CalloutBoxComponent, Heading1, Heading2, Heading3, Heading4, NumberedListComponent, Paragraph, ResizableColumn, Table, Title, TodoListComponent } from "./silde-components";
+import {
+  BlankCardIcon,
+  FourColumnsIcon,
+  FourImageColumnsIcon,
+  ImageAndTextIcon,
+  TextAndImageIcon,
+  ThreeColumnsIcon,
+  ThreeColumnsWithHeadingsIcon,
+  ThreeImageColumnsIcon,
+  TwoColumnsIcon,
+  TwoColumnsWithHeadingsIcon,
+  TwoImageColumnsIcon,
+} from "./icon-component"
+import {
+  BulletListComponent,
+  CalloutBoxComponent,
+  Heading1,
+  Heading2,
+  Heading3,
+  Heading4,
+  NumberedListComponent,
+  Paragraph,
+  ResizableColumn,
+  Table,
+  Title,
+  TodoListComponent,
+} from "./silde-components"
 import {
   BlankCard,
   AccentLeft,
@@ -22,7 +47,7 @@ import {
   TwoImageColumns,
   FourImageColumns,
   ThreeImageColumns,
-} from "@/lib/slide-layout";
+} from "@/lib/slide-layout"
 
 export const data: SidebarData = {
   navMain: [
@@ -58,6 +83,7 @@ export const data: SidebarData = {
 export const themes: Theme[] = [
   {
     name: "Default",
+    image: "default.avif",
     fontFamily: "'Inter', sans-serif",
     fontColor: "#000000",
     backgroundColor: "#f0f0f0",
@@ -69,6 +95,7 @@ export const themes: Theme[] = [
   },
   {
     name: "Dark Elegance",
+    image: "dark-elegance.jpg",
     fontFamily: "'Playfair Display', serif",
     fontColor: "#ffffff",
     backgroundColor: "#1a1a1a",
@@ -81,6 +108,7 @@ export const themes: Theme[] = [
   },
   {
     name: "Nature Fresh",
+    image: "nature-fresh.jpg",
     fontFamily: "'Montserrat', sans-serif",
     fontColor: "#1b4332",
     backgroundColor: "#e8f5e9",
@@ -141,6 +169,7 @@ export const themes: Theme[] = [
   },
   {
     name: "Minimalist Mono",
+    image: "minimalist-mono.jpg",
     fontFamily: "'IBM Plex Mono', monospace",
     fontColor: "#000000",
     backgroundColor: "#ffffff",
@@ -164,6 +193,7 @@ export const themes: Theme[] = [
   },
   {
     name: "Earthy Tones",
+    image: "earthy-tones.jpg",
     fontFamily: "'Nunito', sans-serif",
     fontColor: "#3d3d3d",
     backgroundColor: "#d7ccc8",
@@ -200,6 +230,7 @@ export const themes: Theme[] = [
   },
   {
     name: "Arctic Frost",
+    image: "arctic-frost.avif",
     fontFamily: "'Quicksand', sans-serif",
     fontColor: "#2c3e50",
     backgroundColor: "#e0f7fa",
@@ -378,7 +409,6 @@ export const new_page_options = [
   },
 ]
 
-
 export const layouts: LayoutGroup[] = [
   {
     name: "Basic",
@@ -489,7 +519,7 @@ export const layouts: LayoutGroup[] = [
       },
     ],
   },
-];
+]
 
 export const component: ComponentGroup[] = [
   {
@@ -536,7 +566,7 @@ export const component: ComponentGroup[] = [
         name: "Paragraph",
         type: "component",
         component: Paragraph,
-        icon: "Paragraph",
+        icon: "P",
       },
     ],
   },
@@ -654,4 +684,4 @@ export const component: ComponentGroup[] = [
       },
     ],
   },
-];
+]
