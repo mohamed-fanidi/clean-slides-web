@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { ContentItem } from "@/lib/types"
 import { cn } from "@/lib/utils"
+import { LucideIcon } from "lucide-react"
 import React from "react"
 import { useDrag } from "react-dnd"
 
@@ -9,7 +10,7 @@ type ComponentItemProps = {
   componentType: string
   name: string
   component: ContentItem
-  icon: string
+  icon: LucideIcon
 }
 
 const ComponentCard = ({ item }: { item: ComponentItemProps }) => {
@@ -33,7 +34,7 @@ const ComponentCard = ({ item }: { item: ComponentItemProps }) => {
         variant="secondary"
         className="w-full cursor-grab justify-baseline rounded border active:cursor-grabbing"
       >
-        {item.icon}
+        <item.icon strokeWidth={1} />
         <span> {item.name}</span>
       </Button>
     </div>

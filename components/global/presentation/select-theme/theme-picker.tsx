@@ -1,4 +1,4 @@
-import { generateLayouts } from "@/actions/chatgpt"
+import { generateLayouts } from "@/actions/gemini"
 import { Button } from "@/components/ui/button"
 import { Theme } from "@/lib/types"
 import { useSlideStore } from "@/store/use-slide-store"

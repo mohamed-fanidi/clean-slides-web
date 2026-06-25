@@ -1,4 +1,5 @@
 import { Icon } from "@solar-icons/react/lib/types"
+import { LucideIcon } from "lucide-react"
 
 export interface NavItem {
   id: string
@@ -112,9 +113,9 @@ export interface LayoutGroup {
   layouts: Layout[]
 }
 
-interface Component {
+export interface Component {
   name: string
-  icon: string
+  icon: LucideIcon
   type: string
   component: ContentItem
   componentType: string
