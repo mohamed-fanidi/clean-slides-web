@@ -1,6 +1,6 @@
 "use client"
 
-import { generateLayouts } from "@/actions/chatgpt"
+import { generateLayouts } from "@/actions/gemini"
 import { Button } from "@/components/ui/button"
 import {
   Carousel,

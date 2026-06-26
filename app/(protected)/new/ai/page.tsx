@@ -25,7 +25,7 @@ import { OutlineCard } from "@/lib/types"
 import { v4 } from "uuid"
 import { createProject } from "@/actions/project"
 import { useSlideStore } from "@/store/use-slide-store"
-import { generateCreativePrompt } from "@/actions/chatgpt"
+import { generateCreativePrompt } from "@/actions/gemini"
 
 const CreateAI = () => {
   const router = useRouter()

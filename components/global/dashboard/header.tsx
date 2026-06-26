@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { AddCircle, InboxOut } from "@solar-icons/react"
 import { User } from "@prisma/client"
 import { useRouter } from "next/navigation"
+import { useSearchStore } from "@/store/use-search-store"
 
 type Props = {
   user: User
@@ -18,13 +19,19 @@ type Props = {
 export default function Header({ user }: Props) {
   const { open } = useSidebar()
   const router = useRouter()
+  const query = useSearchStore((state) => state.query)
+  const setQuery = useSearchStore((state) => state.setQuery)
 
   return (
     <header className="flex items-center justify-between border-b p-3">
       <div className="flex items-center gap-2">
         <SidebarTrigger className={`${open && "hidden"} size-8 bg-secondary`} />
         <InputGroup className="max-w-xs border-none bg-secondary!">
-          <InputGroupInput className="" placeholder="Search..." />
+          <InputGroupInput
+            placeholder="Search..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
           <InputGroupAddon>
             <SearchIcon className="text-muted-foreground" />
           </InputGroupAddon>

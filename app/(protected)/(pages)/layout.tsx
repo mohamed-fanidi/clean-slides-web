@@ -21,8 +21,8 @@ export default async function Layout({ children }: Props) {
         recentProjects={recentProjects.data || []}
       />
       <SidebarInset>
-          <Header user={checkUser.user}/>
-          {children}
+        <Header user={checkUser.user} />
+        <div className="h-[calc(100dvh-58px)] overflow-y-auto">{children}</div>
       </SidebarInset>
     </SidebarProvider>
   )

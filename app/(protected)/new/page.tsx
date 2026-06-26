@@ -7,14 +7,15 @@ import Link from "next/link"
 import { useState } from "react"
 
 export default function page() {
-
   const [selectedOption, setSelectedOption] = useState<string | null>(null)
 
   return (
     <div className="relative flex h-screen w-full items-center justify-center">
       <main className="flex flex-col gap-8">
         <h1 className="text-4xl tracking-tighter">
-          <span className="dark:text-chart-24ereeewee text-primary"> {/*FIXME: WHAT is that className?*/}
+          <span className="dark:text-chart-24ereeewee text-primary">
+            {" "}
+            {/*FIXME: WHAT is that className?*/}
             Let's create
           </span>{" "}
           <span className="">your best presentation</span>

@@ -1,13 +1,17 @@
 "use client"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
-
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, RotateCcw } from "lucide-react"
-import useScratchStore from "@/store/use-scratch-store"
-import { Select, SelectContent, SelectItem } from "@/components/ui/select"
-import { SelectTrigger, SelectValue } from "@radix-ui/react-select"
+import { ChevronLeft, Plus, RotateCcw, ArrowRight } from "lucide-react"
 import { Input } from "@/components/ui/input"
+import useScratchStore from "@/store/use-scratch-store"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import CardList from "@/components/global/new/outline-card"
 import { OutlineCard } from "@/lib/types"
 import { v4 } from "uuid"
@@ -16,20 +20,22 @@ import { createProject } from "@/actions/project"
 import { useSlideStore } from "@/store/use-slide-store"
 
 const ScratchPage = () => {
-
   const router = useRouter()
   const { setProject } = useSlideStore()
   const [editText, setEditText] = useState("")
   const [editingCard, setEditingCard] = useState<string | null>(null)
   const [selectedCard, setSelectedCard] = useState<string | null>(null)
-  const { outlines, resetOutlines, addOutline, addMultipleOutlines } = useScratchStore()
-  const handleBack = () => {
-    resetOutlines()
-  }
+  const [isGenerating, setIsGenerating] = useState(false)
+  const { outlines, resetOutlines, addOutline, addMultipleOutlines } =
+    useScratchStore()
+
   const resetCards = () => {
+    setEditingCard(null)
+    setSelectedCard(null)
     setEditText("")
     resetOutlines()
   }
+
   const handleAddCard = () => {
     const newCard: OutlineCard = {
       id: v4(),
@@ -47,111 +53,105 @@ const ScratchPage = () => {
       })
       return
     }
-    const res = await createProject(outlines?.[0]?.title, outlines)
+    setIsGenerating(true)
+    try {
+      const res = await createProject(outlines?.[0]?.title, outlines)
 
-    if (res.status !== 200) {
-      toast.error("Error", {
-        description: res.error || "Failed to create project",
-      })
-      return
-    }
-    if (res.data) {
+      if (res.status !== 200 || !res.data) {
+        throw new Error(res.error || "Failed to create project")
+      }
+
       setProject(res.data)
-      resetOutlines()
-      toast.success("Success", {
-        description: "Project created successfully",
-      })
       router.push(`/presentation/${res.data.id}/select-theme`)
-    } else {
-      toast.error("Error", {
-        description: "Failed to create project. ",
+
+      toast.success("Success", {
+        description: "Project created successfully!",
       })
+      resetOutlines()
+    } catch (error) {
+      console.log(error)
+      toast.error("Error", {
+        description: "Failed to create project",
+      })
+    } finally {
+      setIsGenerating(false)
     }
   }
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-6 px-4 sm:px-6 lg:px-8">
-      <Button onClick={handleBack} variant="outline" className="mb-4">
-        <ChevronLeft className="mr-2 h-4 w-4" />
+    <div className="mx-auto flex min-h-dvh w-full max-w-2xl flex-col gap-10 px-4 py-12 sm:px-6">
+      <Button
+        onClick={() => router.back()}
+        variant="ghost"
+        size="sm"
+        className="w-fit"
+      >
+        <ChevronLeft />
         Back
       </Button>
-      <h1 className="text-left text-2xl font-bold text-primary sm:text-3xl">
-        Prompt
+
+      <h1 className="text-center text-4xl tracking-tighter">
+        Build your presentation, <br /> your way
       </h1>
-      <div className="roundev-xl bg-primary/10 p-4">
-        <div className="flex flex-col items-center justify-between gap-3 rounded-xl sm:flex-row">
+
+      <div className="rounded-xl border border-border bg-muted/40 px-4 py-3.5">
+        <div className="flex items-center gap-1">
           <Input
             value={editText}
             onChange={(e) => setEditText(e.target.value)}
-            placeholder="Enter Prompt and add to the cards...."
-            className="grow border-0 bg-transparent p-0 text-base shadow-none focus-visible:ring-0 sm:text-xl"
+            placeholder="Enter a section title…"
+            className="border-0 bg-transparent px-0 text-base shadow-none placeholder:text-muted-foreground/60 focus-visible:ring-0"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && editText) handleAddCard()
+            }}
           />
-          <div className="flex items-center gap-3">
-            <Select
-              value={outlines.length > 0 ? outlines.length.toString() : "0"}
-            >
-              <SelectTrigger className="w-fit gap-2 font-semibold shadow-xl">
-                <SelectValue placeholder="Select number of cards" />
-              </SelectTrigger>
-              <SelectContent className="w-fit">
-                {outlines.length === 0 ? (
-                  <SelectItem value="0" className="font-semibold">
-                    No cards
-                  </SelectItem>
-                ) : (
-                  Array.from(
-                    { length: outlines.length },
-                    (_, idx) => idx + 1
-                  ).map((num) => (
-                    <SelectItem
-                      key={num}
-                      value={num.toString()}
-                      className="font-semibold"
-                    >
-                      {num} {num === 1 ? "Card" : "Cards"}
-                    </SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
-            <Button
-              variant="destructive"
-              onClick={resetCards}
-              size="icon"
-              aria-label="Reset cards"
-            >
-              <RotateCcw className="h-4 w-4" />
-            </Button>
-          </div>
+          <Button onClick={handleAddCard} disabled={!editText}>
+            <Plus />
+            Add
+          </Button>
+          <Button
+            disabled={outlines.length === 0}
+            variant="ghost"
+            size="icon"
+            onClick={resetCards}
+            className="text-muted-foreground hover:text-foreground"
+            aria-label="Reset"
+          >
+            <RotateCcw className="size-3.5" />
+          </Button>
         </div>
       </div>
+
       <CardList
         outlines={outlines}
-        addOutline={addOutline}
         addMultipleOutlines={addMultipleOutlines}
         editingCard={editingCard}
         selectedCard={selectedCard}
         editText={editText}
         onEditChange={setEditText}
         onCardSelect={setSelectedCard}
+        setEditText={setEditText}
+        setEditingCard={setEditingCard}
+        setSelectedCard={setSelectedCard}
         onCardDoubleClick={(id, title) => {
           setEditingCard(id)
           setEditText(title)
         }}
-        setEditText={setEditText}
-        setEditingCard={setEditingCard}
-        setSelectedCard={setSelectedCard}
       />
-      <Button
-        onClick={handleAddCard}
-        variant={"secondary"}
-        className="bg-primary-10 w-full"
-      >
-        Add
-      </Button>
-      {outlines?.length > 0 && (
-        <Button className="w-full" onClick={handleGenerate}>
-          Generate Slides
+
+      {outlines.length > 0 && (
+        <Button
+          className="mx-auto mt-4 w-fit"
+          onClick={handleGenerate}
+          disabled={isGenerating}
+        >
+          {isGenerating ? (
+            "Generating..."
+          ) : (
+            <>
+              Generate Slides <ArrowRight />
+            </>
+          )}
         </Button>
       )}
     </div>

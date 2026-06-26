@@ -1,4 +1,4 @@
-import type { SidebarData, Theme } from "@/lib/types"
+import type { Component, SidebarData, Theme } from "@/lib/types"
 import { ComponentGroup, LayoutGroup } from "./types"
 import {
   Home,
@@ -48,6 +48,28 @@ import {
   FourImageColumns,
   ThreeImageColumns,
 } from "@/lib/slide-layout"
+import {
+  BetweenVerticalEnd,
+  CircleAlert,
+  CircleCheck,
+  CircleDot,
+  CircleQuestionMark,
+  CircleX,
+  Grid2x2,
+  Grid3x2,
+  Grid3x3,
+  Heading,
+  Heading1 as Heading_1,
+  Heading2 as Heading_2,
+  Heading3 as Heading_3,
+  Heading4 as Heading_4,
+  Info,
+  List,
+  ListOrdered,
+  ListTodo,
+  Table as TTB,
+  Type,
+} from "lucide-react"
 
 export const data: SidebarData = {
   navMain: [
@@ -390,22 +412,22 @@ export const themes: Theme[] = [
 export const new_page_options = [
   {
     title: "Use a Template",
-    description: "Write a prompt and leave everything else for us to handle ",
+    description: "Pick a polished layout and make it yours in seconds",
     type: "template",
-    img: "https://app.presentations.ai/docs/assets/images/createflow/aicreateflow/v2/pasteoutline.png",
+    img: "https://app.presentations.ai/docs/assets/images/createflow/aicreateflow/v2/fileorlink.png",
   },
   {
-    title: "Generate with Ai",
+    title: "Generate with AI",
     description:
-      "Describe your presentation idea and leave everything else for us to handle ",
+      "Describe your idea and we'll turn it into a full presentation",
     type: "ai",
     img: "https://app.presentations.ai/docs/assets/images/createflow/aicreateflow/v2/promptoroutline.png",
   },
   {
     title: "Start from Scratch",
-    description: "Write a prompt and leave everything else for us to handle ",
+    description: "Build your outline card by card, exactly how you want it",
     type: "scratch",
-    img: "https://app.presentations.ai/docs/assets/images/createflow/aicreateflow/v2/fileorlink.png",
+    img: "https://app.presentations.ai/docs/assets/images/createflow/aicreateflow/v2/pasteoutline.png",
   },
 ]
 
@@ -521,109 +543,111 @@ export const layouts: LayoutGroup[] = [
   },
 ]
 
-export const component: ComponentGroup[] = [
+export const textComponent: Component[] = [
   {
-    name: "Text",
-    components: [
-      {
-        name: "Title",
-        icon: "T",
-        type: "component",
-        component: Title,
-        componentType: "title",
-      },
-      {
-        componentType: "heading1",
-        name: "Heading 1",
-        type: "component",
-        component: Heading1,
-        icon: "H1",
-      },
-      {
-        componentType: "heading2",
-        name: "Heading 2",
-        type: "component",
-        component: Heading2,
-        icon: "H2",
-      },
-      {
-        componentType: "heading3",
-        name: "Heading 3",
-        type: "component",
-        component: Heading3,
-        icon: "H3",
-      },
-      {
-        componentType: "heading4",
-        name: "Heading 4",
-        type: "component",
-        component: Heading4,
-        icon: "H4",
-      },
-
-      {
-        componentType: "paragraph",
-        name: "Paragraph",
-        type: "component",
-        component: Paragraph,
-        icon: "P",
-      },
-    ],
+    name: "Title",
+    icon: Heading,
+    type: "component",
+    component: Title,
+    componentType: "title",
+  },
+  {
+    componentType: "heading1",
+    name: "Heading 1",
+    type: "component",
+    component: Heading1,
+    icon: Heading_1,
+  },
+  {
+    componentType: "heading2",
+    name: "Heading 2",
+    type: "component",
+    component: Heading2,
+    icon: Heading_2,
+  },
+  {
+    componentType: "heading3",
+    name: "Heading 3",
+    type: "component",
+    component: Heading3,
+    icon: Heading_3,
+  },
+  {
+    componentType: "heading4",
+    name: "Heading 4",
+    type: "component",
+    component: Heading4,
+    icon: Heading_4,
   },
 
+  {
+    componentType: "paragraph",
+    name: "Paragraph",
+    type: "component",
+    component: Paragraph,
+    icon: Type,
+  },
+]
+
+export const listsComponent: Component[] = [
+  {
+    componentType: "bulletList",
+    name: "Bulleted list",
+    type: "component",
+    component: BulletListComponent,
+    icon: List,
+  },
+  {
+    componentType: "numberedList",
+    name: "Numbered list",
+    type: "component",
+    component: NumberedListComponent,
+    icon: ListOrdered,
+  },
+  {
+    componentType: "todoList",
+    name: "Todo list",
+    type: "component",
+    component: TodoListComponent,
+    icon: ListTodo,
+  },
+]
+
+export const component: ComponentGroup[] = [
   {
     name: "Tables",
     components: [
       {
         componentType: "table2x2",
-        name: "2×2 table",
+        name: "2x2 table",
         type: "component",
         component: { ...Table, initialColumns: 2, initialRows: 2 },
-        icon: "⊞",
+        icon: Grid2x2,
+      },
+      {
+        componentType: "table2x3",
+        name: "2x3 table",
+        type: "component",
+        component: { ...Table, initialColumns: 2, initialRows: 3 },
+        icon: TTB,
+      },
+      {
+        componentType: "table3x2",
+        name: "3x2 table",
+        type: "component",
+        component: { ...Table, initialColumns: 3, initialRows: 2 },
+        icon: Grid3x2,
       },
       {
         componentType: "table3x3",
-        name: "3×3 table",
+        name: "3x3 table",
         type: "component",
         component: { ...Table, initialColumns: 3, initialRows: 3 },
-        icon: "⊞",
-      },
-      {
-        componentType: "table4x4",
-        name: "4×4 table",
-        type: "component",
-        component: { ...Table, initialColumns: 4, initialRows: 4 },
-        icon: "⊞",
+        icon: Grid3x3,
       },
     ],
   },
 
-  {
-    name: "Lists",
-    components: [
-      {
-        componentType: "bulletList",
-        name: "Bulleted list",
-        type: "component",
-        component: BulletListComponent,
-        icon: "•",
-      },
-      {
-        componentType: "numberedList",
-        name: "Numbered list",
-        type: "component",
-        component: NumberedListComponent,
-        icon: "1.",
-      },
-      {
-        componentType: "todoList",
-        name: "Todo list",
-        type: "component",
-        component: TodoListComponent,
-        icon: "☐",
-      },
-    ],
-  },
   {
     name: "Callouts",
     components: [
@@ -632,42 +656,42 @@ export const component: ComponentGroup[] = [
         name: "Note box",
         type: "component",
         component: { ...CalloutBoxComponent, callOutType: "info" },
-        icon: "📝",
+        icon: CircleDot,
       },
       {
         componentType: "info",
         name: "Info box",
         type: "component",
         component: { ...CalloutBoxComponent, callOutType: "info" },
-        icon: "ℹ",
+        icon: Info,
       },
       {
         componentType: "warning",
         name: "Warning box",
         type: "component",
         component: { ...CalloutBoxComponent, callOutType: "warning" },
-        icon: "⚠",
+        icon: CircleX,
       },
       {
         componentType: "caution",
         name: "Caution box",
         type: "component",
         component: { ...CalloutBoxComponent, callOutType: "caution" },
-        icon: "⚠",
+        icon: CircleAlert,
       },
       {
         componentType: "success",
         name: "Success box",
         type: "component",
         component: { ...CalloutBoxComponent, callOutType: "success" },
-        icon: "✓",
+        icon: CircleCheck,
       },
       {
         componentType: "question",
         name: "Question box",
         type: "component",
         component: { ...CalloutBoxComponent, callOutType: "question" },
-        icon: "?",
+        icon: CircleQuestionMark,
       },
     ],
   },
@@ -680,7 +704,7 @@ export const component: ComponentGroup[] = [
         name: "2x2 Column",
         type: "component",
         component: ResizableColumn,
-        icon: "⊞",
+        icon: BetweenVerticalEnd,
       },
     ],
   },
