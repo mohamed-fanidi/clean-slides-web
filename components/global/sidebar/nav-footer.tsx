@@ -14,6 +14,10 @@ import { BadgeCheck, Loader } from "lucide-react"
 import { useState } from "react"
 import { User } from "@prisma/client"
 import { useUser } from "@clerk/nextjs"
+import { buySubscription } from "@/actions/lemonSqueezy"
+import { error } from "node:console"
+import { toast } from "sonner"
+import { useRouter } from "next/navigation"
 
 export function NavFooter({
   prismaUser,
@@ -24,7 +28,33 @@ export function NavFooter({
 }) {
   const { isLoaded, isSignedIn } = useUser()
   const [loading, setLoading] = useState(false)
+  const router = useRouter()
+  
   if (!isLoaded || !isSignedIn) return null
+
+  const handleUpgrading = async () => {
+    
+    setLoading(true)
+    try {
+      
+      const res = await buySubscription(prismaUser.id)
+      console.log(res.status)
+      
+      if( res.status !== 200 ) {
+        
+        throw new Error('Faild to upgrade subscription')
+      }
+      router.push(res.url)
+
+    }catch(error){
+      console.error(error)
+      toast.error('Error', {
+        description: 'Something went rong. Please try later ', 
+      })
+    }finally{
+      setLoading(false)
+    }
+  }
   return (
     <SidebarFooter className="border-t p-4">
       <SidebarMenu>
@@ -32,9 +62,11 @@ export function NavFooter({
           <div className="flex items-center justify-between gap-2">
             {!prismaUser.subscription && !hasUpgraded ? (
               <Button
+                onClick={handleUpgrading}
                 variant="secondary"
                 className="gap-1.5 px-2 capitalize"
                 size="sm"
+                
               >
                 {loading ? (
                   <Loader className="size-4 animate-spin" />
